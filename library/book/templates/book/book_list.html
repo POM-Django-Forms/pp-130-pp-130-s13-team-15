@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>All Books</title>
+</head>
+<body>
+  <h1>All Books</h1>
+
+  <!-- Форма фильтрации -->
+  <form method="get" action="{% url 'book_list' %}">
+    <label>
+      Title:
+      <input type="text" name="title" value="{{ title_query }}">
+    </label>
+    <label>
+      Author surname:
+      <input type="text" name="author" value="{{ author_query }}">
+    </label>
+    <button type="submit">Filter</button>
+    {% if title_query or author_query %}
+      <a href="{% url 'book_list' %}">Clear</a>
+    {% endif %}
+  </form>
+
+  <ul>
+    {% for book in books %}
+      <li>
+        <strong>
+          <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>
+        </strong>
+        {% if book.authors.exists %}
+          by
+          {% for author in book.authors.all %}
+            <a href="{% url 'author_detail' author.id %}">
+              {{ author.name }} {{ author.surname }}
+            </a>{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        {% endif %}
+      </li>
+    {% empty %}
+      <li>No books found.</li>
+    {% endfor %}
+  </ul>
+
+  <p><a href="{% url 'home' %}">← Back to Home</a></p>
+</body>
+</html>

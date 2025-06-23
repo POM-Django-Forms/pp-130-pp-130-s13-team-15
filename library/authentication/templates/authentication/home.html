@@ -1,0 +1,27 @@
+<h1>Welcome to the Library</h1>
+
+{% if user.is_authenticated %}
+  <p>Hello, {{ user.first_name }}!</p>
+  <ul>
+    <li><a href="{% url 'book_list' %}">View all Books</a></li>
+    <li><a href="{% url 'author_list' %}">View all Authors</a></li>
+
+    {% if user.role == 1 %}
+      <!-- Для библиотекаря: все разделы CRUD -->
+      <li><a href="{% url 'order_list' %}">All Orders</a></li>
+      <li><a href="{% url 'user_list' %}">View all Users</a></li>
+    {% else %}
+      <!-- Для простого пользователя -->
+      <li><a href="{% url 'my_orders' %}">My Orders</a></li>
+      <li><a href="{% url 'create_order' %}">Place an Order</a></li>
+    {% endif %}
+
+    <li><a href="{% url 'logout' %}">Logout</a></li>
+  </ul>
+{% else %}
+  <p>Please choose an option:</p>
+  <ul>
+    <li><a href="{% url 'login' %}">Login</a></li>
+    <li><a href="{% url 'register' %}">Register</a></li>
+  </ul>
+{% endif %}

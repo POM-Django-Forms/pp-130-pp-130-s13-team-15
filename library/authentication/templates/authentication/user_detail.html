@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>User {{ user_obj.email }}</title>
+</head>
+<body>
+  <h1>{{ user_obj.first_name }} {{ user_obj.last_name }}</h1>
+
+  <p><strong>Email:</strong>      {{ user_obj.email }}</p>
+  <p><strong>Role:</strong>       {{ user_obj.get_role_name }}</p>
+  <p><strong>Active:</strong>     {{ user_obj.is_active }}</p>
+  <p><strong>Created at:</strong> {{ user_obj.created_at }}</p>
+  <p><strong>Updated at:</strong> {{ user_obj.updated_at }}</p>
+
+  <h2>Orders by this user</h2>
+  <ul>
+    {% for o in orders %}
+      <li>
+        <strong>
+          <a href="{% url 'order_detail' o.id %}">
+            Order #{{ o.id }}
+          </a>
+        </strong> —
+        <strong>Book:</strong>
+        <a href="{% url 'book_detail' o.book.id %}">
+          {{ o.book.name }}
+        </a>,
+        <strong>Created:</strong> {{ o.created_at }},
+        <strong>Due:</strong>     {{ o.plated_end_at }},
+        {% if o.end_at %}
+          <strong>Returned:</strong> {{ o.end_at }}
+        {% else %}
+          <em>(Not returned)</em>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li><em>No orders for this user.</em></li>
+    {% endfor %}
+  </ul>
+
+  <p><a href="{% url 'user_list' %}">← Back to all users</a></p>
+</body>
+</html>

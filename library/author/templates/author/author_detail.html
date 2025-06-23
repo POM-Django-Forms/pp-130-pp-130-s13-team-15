@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>{{ author.name }} {{ author.surname }}</title></head>
+<body>
+  <h1>{{ author.name }} {{ author.surname }}</h1>
+  {% if author.patronymic %}
+    <p><strong>Patronymic:</strong> {{ author.patronymic }}</p>
+  {% endif %}
+
+  <h2>Books by this author</h2>
+  <ul>
+    {% for book in books %}
+      <li>
+        <a href="{% url 'book_detail' book.id %}">
+          {{ book.name }}
+        </a>
+      </li>
+    {% empty %}
+      <li><em>No books found for this author.</em></li>
+    {% endfor %}
+  </ul>
+
+  <p><a href="{% url 'author_list' %}">← Back to Authors</a></p>
+</body>
+</html>

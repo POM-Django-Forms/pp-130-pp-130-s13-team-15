@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Order #{{ order.id }}</title>
+</head>
+<body>
+  <h1>Order #{{ order.id }}</h1>
+
+  <p>
+    <strong>User:</strong>
+    <a href="{% url 'user_detail' order.user.id %}">
+      {{ order.user.first_name }} {{ order.user.last_name }}
+    </a>
+  </p>
+
+  <p>
+    <strong>Book:</strong>
+    <a href="{% url 'book_detail' order.book.id %}">
+      {{ order.book.name }}
+    </a>
+  </p>
+
+  <p><strong>Created at:</strong> {{ order.created_at|date:"F j, Y" }}</p>
+  <p><strong>Due date:</strong>  {{ order.plated_end_at|date:"F j, Y" }}</p>
+  <p>
+    <strong>Returned:</strong>
+    {% if order.end_at %}
+      {{ order.end_at|date:"F j, Y" }}
+    {% else %}
+      <em>Not returned</em>
+    {% endif %}
+  </p>
+
+  {% if can_close %}
+    <form method="post" action="{% url 'close_order' order.id %}">
+      {% csrf_token %}
+      <button type="submit">Close this order</button>
+    </form>
+  {% endif %}
+
+  <p><a href="{% url 'order_list' %}">← Back to All Orders</a></p>
+  <p><a href="{% url 'my_orders' %}">← Back to My Orders</a></p>
+</body>
+</html>

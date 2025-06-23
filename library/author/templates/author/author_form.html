@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Add Author</title></head>
+<body>
+  <h1>Add Author</h1>
+  {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+  <form method="post" action="{% url 'author_create' %}">
+    {% csrf_token %}
+    <label>Name:     <input type="text" name="name"     required></label><br>
+    <label>Surname:  <input type="text" name="surname"  required></label><br>
+    <label>Patronymic: <input type="text" name="patronymic"></label><br>
+    <button type="submit">Save</button>
+  </form>
+  <p><a href="{% url 'author_list' %}">← Back to Authors</a></p>
+</body>
+</html>
+

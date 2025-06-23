@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Authors</title>
+</head>
+<body>
+  <h1>Authors</h1>
+  <p><a href="{% url 'author_create' %}">+ Add new author</a></p>
+
+  <ul>
+    {% for a in authors %}
+      <li>
+        <!-- Имя и фамилия автора как ссылка на детали -->
+        <strong>
+          <a href="{% url 'author_detail' a.id %}">
+            {{ a.name }} {{ a.surname }}
+          </a>
+        </strong>
+        <!-- Кнопка удаления остается -->
+        <a href="{% url 'author_delete' a.id %}"
+           onclick="return confirm('Delete {{ a.name }} {{ a.surname }}?');">
+          [Delete]
+        </a>
+      </li>
+    {% empty %}
+      <li>No authors found.</li>
+    {% endfor %}
+  </ul>
+
+  <p><a href="{% url 'home' %}">← Back to Home</a></p>
+</body>
+</html>
