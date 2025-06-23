@@ -1,3 +1,4 @@
+<!-- authentication/templates/authentication/user_detail.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,27 +8,27 @@
 <body>
   <h1>{{ user_obj.first_name }} {{ user_obj.last_name }}</h1>
 
-  <p><strong>Email:</strong>      {{ user_obj.email }}</p>
-  <p><strong>Role:</strong>       {{ user_obj.get_role_name }}</p>
-  <p><strong>Active:</strong>     {{ user_obj.is_active }}</p>
-  <p><strong>Created at:</strong> {{ user_obj.created_at }}</p>
-  <p><strong>Updated at:</strong> {{ user_obj.updated_at }}</p>
+  <p><strong>Email:</strong>  {{ user_obj.email }}</p>
+  <p><strong>Role:</strong>   {{ user_obj.get_role_name }}</p>
+  <p><strong>Active:</strong> {{ user_obj.is_active }}</p>
+  <p><strong>Created:</strong> {{ user_obj.created_at }}</p>
+  <p><strong>Updated:</strong> {{ user_obj.updated_at }}</p>
 
   <h2>Orders by this user</h2>
   <ul>
     {% for o in orders %}
       <li>
         <strong>
-          <a href="{% url 'order_detail' o.id %}">
-            Order #{{ o.id }}
-          </a>
+          <a href="{% url 'order_detail' o.id %}">Order #{{ o.id }}</a>
         </strong> —
-        <strong>Book:</strong>
-        <a href="{% url 'book_detail' o.book.id %}">
-          {{ o.book.name }}
-        </a>,
-        <strong>Created:</strong> {{ o.created_at }},
-        <strong>Due:</strong>     {{ o.plated_end_at }},
+        <strong>Books:</strong>
+        {% for book in o.books.all %}
+          <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>{% if not forloop.last %}, {% endif %}
+        {% empty %}
+          <em>No books</em>
+        {% endfor %} —
+        <strong>Created:</strong> {{ o.created_at }} —
+        <strong>Due:</strong> {{ o.plated_end_at }} —
         {% if o.end_at %}
           <strong>Returned:</strong> {{ o.end_at }}
         {% else %}

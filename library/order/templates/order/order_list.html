@@ -7,12 +7,11 @@
 </head>
 <body>
   <h1>All Orders</h1>
+
   <ul>
     {% for o in orders %}
       <li>
-        <strong>
-          <a href="{% url 'order_detail' o.id %}">Order #{{ o.id }}</a>
-        </strong> —
+        <strong><a href="{% url 'order_detail' o.id %}">Order #{{ o.id }}</a></strong> —
         <strong>User:</strong>
         <a href="{% url 'user_detail' o.user.id %}">
           {{ o.user.first_name }} {{ o.user.last_name }}
@@ -24,12 +23,15 @@
           <em>No books in this order.</em>
         {% endfor %} —
         <strong>Created:</strong> {{ o.created_at|date:"F j, Y" }} —
-        <strong>Due:</strong>     {{ o.plated_end_at|date:"F j, Y" }}
+        <strong>Due:</strong> {{ o.plated_end_at|date:"F j, Y" }}
+
         {% if o.end_at %}
           — <strong>Returned:</strong> {{ o.end_at|date:"F j, Y" }}
-        {% endif %}
-        {% if not o.end_at %}
-          — <a href="{% url 'close_order' o.id %}">Close order</a>
+        {% elif user.role == 1 or o.user == user %}
+          <form method="post" action="{% url 'close_order' o.id %}" style="display:inline">
+            {% csrf_token %}
+            <button type="submit">Close order</button>
+          </form>
         {% endif %}
       </li>
     {% empty %}
