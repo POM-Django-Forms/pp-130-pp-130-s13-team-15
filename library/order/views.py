@@ -1,87 +1,75 @@
-from datetime import timedelta
 from django.shortcuts               import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.utils                   import timezone
 from django.http                    import HttpResponse
-from .models                        import Order
-from book.models                    import Book
+from django.utils                   import timezone
+from datetime                       import timedelta
 
-@login_required
-def order_list(request):
-    # Только библиотекарь видит все заказы
-    if request.user.role != 1:
-        return HttpResponse("Access denied", status=403)
-    orders = Order.objects.all().order_by('-created_at')
-    return render(request, 'order/order_list.html', {
-        'orders': orders,
-    })
-
-@login_required
-def my_orders(request):
-    # Любой залогиненный пользователь видит только свои заказы
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'order/my_orders.html', {
-        'orders': orders,
-    })
+from .models import Order
+from .forms  import OrderForm
 
 @login_required
 def create_order(request):
-    # Только гость (visitor, role=0) может создавать заказы
-    if request.user.role != 0:
-        return HttpResponse("Access denied", status=403)
-
-    # дефолтная дата возврата через 30 дней
-    default_due = (timezone.now() + timedelta(days=30)).date()
-
     if request.method == 'POST':
-        book_id = request.POST.get('book')
-        due_str = request.POST.get('due_date')  # ожидаем YYYY-MM-DD
-        try:
-            book = Book.objects.get(id=book_id)
-            due  = timezone.datetime.fromisoformat(due_str)
-            order = Order.create(user=request.user, book=book, plated_end_at=due)
-            if order:
-                return redirect('my_orders')
-            else:
-                error = "Cannot create order (maybe no copies or wrong date)"
-        except Exception:
-            error = "Invalid input"
-        return render(request, 'order/create_order.html', {
-            'books':      Book.objects.filter(count__gt=0),
-            'default_due': default_due,
-            'error':      error,
-        })
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.user = request.user
+            books = form.cleaned_data['books']
+            if books:
+                order.book = books[0]
+            order.save()
+            order.books.set(books)
+            return redirect('my_orders')
+    else:
+        default_due = timezone.now().date() + timedelta(days=30)
+        initial = {'plated_end_at': default_due}
+        book_pk = request.GET.get('book')
+        if book_pk:
+            initial['books'] = [book_pk]
+        form = OrderForm(initial=initial)
 
-    # GET: показываем форму создания заказа
-    return render(request, 'order/create_order.html', {
-        'books':       Book.objects.filter(count__gt=0),
-        'default_due': default_due,
-    })
+    return render(request, 'order/order_form.html', {'form': form})
 
 @login_required
-def close_order(request, order_id):
-    # Только библиотекарь может закрыть (вернуть) заказ
-    if request.user.role != 1:
-        return HttpResponse("Access denied", status=403)
-
+def order_update(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    order.update(end_at=timezone.now())
-    return redirect('order_list')
+    if request.user.role != 1 and order.user != request.user:
+        return HttpResponse("Access denied", status=403)
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=order)
+        if form.is_valid():
+            order = form.save(commit=False)
+            books = form.cleaned_data['books']
+            if books:
+                order.book = books[0]
+            order.save()
+            order.books.set(books)
+            return redirect('order_detail', order_id=order.id)
+    else:
+        form = OrderForm(instance=order)
+    return render(request, 'order/order_form.html', {'form': form, 'order': order})
+
+@login_required
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at').prefetch_related('books')
+    return render(request, 'order/my_orders.html', {'orders': orders})
+
+@login_required
+def order_list(request):
+    orders = Order.objects.select_related('user').prefetch_related('books').order_by('-created_at')
+    return render(request, 'order/order_list.html', {'orders': orders})
 
 @login_required
 def order_detail(request, order_id):
-    # Детали конкретного заказа
     order = get_object_or_404(Order, id=order_id)
+    can_close = order.end_at is None and (request.user.role == 1 or order.user == request.user)
+    return render(request, 'order/order_detail.html', {'order': order, 'can_close': can_close})
 
-    # Доступ: библиотекарь видит все, пользователь — только свои
-    if request.user.role == 1:
-        can_close = (order.end_at is None)
-    else:
-        if order.user != request.user:
-            return HttpResponse("Access denied", status=403)
-        can_close = False
-
-    return render(request, 'order/order_detail.html', {
-        'order':     order,
-        'can_close': can_close,
-    })
+@login_required
+def close_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if order.end_at or request.method != 'POST':
+        return HttpResponse(status=400)
+    order.end_at = timezone.now()
+    order.save()
+    return redirect('order_detail', order_id=order.id)

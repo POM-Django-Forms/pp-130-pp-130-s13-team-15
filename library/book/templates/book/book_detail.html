@@ -1,3 +1,4 @@
+<!-- book/templates/book/book_detail.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,6 +7,28 @@
 </head>
 <body>
   <h1>{{ book.name }}</h1>
+
+  {# Админам — кнопки Edit/Delete #}
+  {% if user.role == 1 %}
+    <p>
+      <a href="{% url 'book_update' book.id %}">✎ Edit Book</a>
+      |
+      <a href="{% url 'book_delete' book.id %}"
+         onclick="return confirm('Delete {{ book.name }}?');">
+        🗑 Delete Book
+      </a>
+    </p>
+  {% endif %}
+
+  {# Кнопка «Order this book» для всех авторизованных пользователей #}
+  {% if user.is_authenticated %}
+    <form method="get" action="{% url 'create_order' %}" style="display:inline">
+      <input type="hidden" name="book" value="{{ book.id }}">
+      <button type="submit">Order this book</button>
+    </form>
+  {% else %}
+    <p><a href="{% url 'login' %}">Log in</a> to place an order.</p>
+  {% endif %}
 
   <p><strong>Description:</strong> {{ book.description }}</p>
 

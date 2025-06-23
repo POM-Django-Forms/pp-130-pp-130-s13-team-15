@@ -1,3 +1,4 @@
+<!-- order/templates/order/order_list.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,24 +11,22 @@
     {% for o in orders %}
       <li>
         <strong>
-          <a href="{% url 'order_detail' o.id %}">
-            Order #{{ o.id }}
-          </a>
+          <a href="{% url 'order_detail' o.id %}">Order #{{ o.id }}</a>
         </strong> —
         <strong>User:</strong>
         <a href="{% url 'user_detail' o.user.id %}">
           {{ o.user.first_name }} {{ o.user.last_name }}
-        </a>,
-        <strong>Book:</strong>
-        <a href="{% url 'book_detail' o.book.id %}">
-          {{ o.book.name }}
-        </a>,
-        <strong>Created:</strong> {{ o.created_at|date:"F j, Y" }},
-        <strong>Due:</strong>     {{ o.plated_end_at|date:"F j, Y" }},
+        </a> —
+        <strong>Books:</strong>
+        {% for book in o.books.all %}
+          <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>{% if not forloop.last %}, {% endif %}
+        {% empty %}
+          <em>No books in this order.</em>
+        {% endfor %} —
+        <strong>Created:</strong> {{ o.created_at|date:"F j, Y" }} —
+        <strong>Due:</strong>     {{ o.plated_end_at|date:"F j, Y" }}
         {% if o.end_at %}
-          <strong>Returned:</strong> {{ o.end_at|date:"F j, Y" }}
-        {% else %}
-          <em>(Not returned)</em>
+          — <strong>Returned:</strong> {{ o.end_at|date:"F j, Y" }}
         {% endif %}
         {% if not o.end_at %}
           — <a href="{% url 'close_order' o.id %}">Close order</a>

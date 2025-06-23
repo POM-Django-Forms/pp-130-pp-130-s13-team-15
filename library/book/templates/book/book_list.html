@@ -7,7 +7,13 @@
 <body>
   <h1>All Books</h1>
 
-  <!-- Форма фильтрации -->
+  {# Если админ, показываем ссылку на создание #}
+  {% if user.role == 1 %}
+    <p>
+      <a href="{% url 'book_create' %}">+ Add new book</a>
+    </p>
+  {% endif %}
+
   <form method="get" action="{% url 'book_list' %}">
     <label>
       Title:

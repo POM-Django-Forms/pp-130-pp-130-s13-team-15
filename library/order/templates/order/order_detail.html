@@ -15,10 +15,12 @@
   </p>
 
   <p>
-    <strong>Book:</strong>
-    <a href="{% url 'book_detail' order.book.id %}">
-      {{ order.book.name }}
-    </a>
+    <strong>Books:</strong>
+    {% for book in order.books.all %}
+      <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>{% if not forloop.last %}, {% endif %}
+    {% empty %}
+      <em>No books in this order.</em>
+    {% endfor %}
   </p>
 
   <p><strong>Created at:</strong> {{ order.created_at|date:"F j, Y" }}</p>

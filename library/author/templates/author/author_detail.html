@@ -1,8 +1,23 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>{{ author.name }} {{ author.surname }}</title></head>
+<head>
+  <meta charset="utf-8">
+  <title>{{ author.name }} {{ author.surname }}</title>
+</head>
 <body>
-  <h1>{{ author.name }} {{ author.surname }}</h1>
+  <h1>
+    {{ author.name }} {{ author.surname }}
+  </h1>
+
+  <p>
+    <a href="{% url 'author_update' author.id %}">✎ Edit Author</a>
+    |
+    <a href="{% url 'author_delete' author.id %}"
+       onclick="return confirm('Delete {{ author.name }} {{ author.surname }}?');">
+      🗑 Delete Author
+    </a>
+  </p>
+
   {% if author.patronymic %}
     <p><strong>Patronymic:</strong> {{ author.patronymic }}</p>
   {% endif %}

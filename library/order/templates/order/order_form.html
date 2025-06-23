@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>
+    {% if order %}Edit Order{% else %}Create Order{% endif %}
+  </title>
+</head>
+<body>
+  <h1>
+    {% if order %}Edit Order{% else %}Create Order{% endif %}
+  </h1>
+
+  <form method="post"
+        action="{% if order %}{% url 'order_update' order.id %}{% else %}{% url 'create_order' %}{% endif %}">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div style="color: red;">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <div>
+      {{ form.books.label_tag }}
+      {{ form.books }}
+      {% if form.books.help_text %}
+        <div><small>{{ form.books.help_text }}</small></div>
+      {% endif %}
+      {% for error in form.books.errors %}
+        <div style="color: red;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div>
+      {{ form.plated_end_at.label_tag }}
+      {{ form.plated_end_at }}
+      {% for error in form.plated_end_at.errors %}
+        <div style="color: red;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <button type="submit">Save</button>
+  </form>
+
+  <p>
+    {% if order %}
+      <a href="{% url 'order_detail' order.id %}">← Back to Order #{{ order.id }}</a>
+    {% else %}
+      <a href="{% url 'my_orders' %}">← Back to My Orders</a>
+    {% endif %}
+  </p>
+</body>
+</html>

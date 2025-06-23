@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% if book %}Edit Book{% else %}Add Book{% endif %}</title>
+</head>
+<body>
+  <h1>{% if book %}Edit Book{% else %}Add Book{% endif %}</h1>
+
+  <form method="post"
+        action="{% if book %}{% url 'book_update' book.id %}{% else %}{% url 'book_create' %}{% endif %}">
+    {% csrf_token %}
+
+    {# Покажем общие ошибки формы #}
+    {% if form.non_field_errors %}
+      <div style="color: red;">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <div>
+      {{ form.name.label_tag }}
+      {{ form.name }}
+      {% for error in form.name.errors %}
+        <div style="color: red;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div>
+      {{ form.description.label_tag }}
+      {{ form.description }}
+      {% for error in form.description.errors %}
+        <div style="color: red;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div>
+      {{ form.count.label_tag }}
+      {{ form.count }}
+      {% for error in form.count.errors %}
+        <div style="color: red;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div>
+      {{ form.authors.label_tag }}
+      {{ form.authors }}
+      {% for error in form.authors.errors %}
+        <div style="color: red;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <button type="submit">Save</button>
+  </form>
+
+  <p><a href="{% url 'book_list' %}">← Back to Books</a></p>
+</body>
+</html>
